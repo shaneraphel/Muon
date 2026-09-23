@@ -24,6 +24,7 @@ def main():
     got = zeropower_via_newtonschulz5(g, steps=5)
     ref = bf16_quintic(g, steps=5).float()
     err = (got.float() - ref).abs().max().item()
+    assert got.dtype == torch.float32
     assert torch.isfinite(got).all()
     assert err < 2e-2, err
 
