@@ -28,6 +28,17 @@ def main():
     assert torch.isfinite(got).all()
     assert err < 2e-2, err
 
+    for device in ("cuda", "mps"):
+        if device == "cuda" and not torch.cuda.is_available():
+            continue
+        if device == "mps" and not torch.backends.mps.is_available():
+            continue
+        gm = torch.randn(64, 64, device=device)
+        out = zeropower_via_newtonschulz5(gm, steps=2)
+        assert out.dtype == torch.bfloat16, (device, out.dtype)
+        assert torch.isfinite(out.float()).all()
+        print("branch ok", device)
+
     p = torch.nn.Parameter(torch.randn(8, 8))
     opt = SingleDeviceMuon([p], lr=0.02)
     before = p.detach().clone()
